@@ -1,95 +1,67 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { Content } from '@/components/content/Content';
+import { SettingsMap } from '@/components/settings-map/SettingsMap';
+
+import { RootState } from '@/store/store';
+import { actions as userMapAction } from '@/store/user-map/userMap.slice';
+import { actions as viewSettingsActions } from '@/store/view-settings/viewSettings.slice';
+
+import { useInitRequest } from '@/hooks/useInitRequest';
+import useWindowDimensions from '@/hooks/useWindowDimensions';
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	//TODO: ЕСЛИ ТАК НЕ ПОЛУЧИТЬСЯ, ТО СОЗДАТЬ ОТДЕЛЬНЫЙ КОМПОНЕНТ, В НЕГО ВСЕ ПОМЕСТИТЬ, А В ЭТОМ КОМПОНЕНТЕ ПРОСТО В RETURN ВЕРНУТЬ И ВСЁ
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const dispatch = useDispatch();
+	const adresFilterString = useSelector(
+		(state: RootState) => state.adresFilterString,
+	);
+	const { isSettingsMap } = useSelector(
+		(state: RootState) => state.viewSettings,
+	);
+	const { width } = useWindowDimensions();
+	const { push } = useRouter();
+	const searchParams = useSearchParams();
+	const map = searchParams.get('map');
+	const { getObject, getFilters } = useInitRequest();
+	const [initApp, setInitApp] = useState(false);
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	useEffect(() => {
+		dispatch(userMapAction.addNumMap(map));
+	}, []);
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	useEffect(() => {
+		if (adresFilterString.srcRequest !== '') {
+			setInitApp(true);
+		}
+	}, [adresFilterString.srcRequest]);
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+	useEffect(() => {
+		if (!map) {
+			push(`?map=7`);
+		} else {
+			getObject();
+			getFilters();
+		}
+	}, [map, initApp]);
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+	useEffect(() => {
+		if (width && width <= 767.98) {
+			dispatch(viewSettingsActions.defaultFilters(''));
+			dispatch(viewSettingsActions.defaultObjects(''));
+		}
+	}, [width]);
+
+	console.log('render Home');
+	return (
+		<div style={{ height: '100%' }}>
+			<Content />
+			{isSettingsMap && <SettingsMap />}
+		</div>
+	);
 }

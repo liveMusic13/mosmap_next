@@ -1,0 +1,52 @@
+@import '../../styles/variables';
+@import '../../styles/functions';
+
+.wrapper_settings {
+	position: absolute;
+	z-index: 5500;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: $color_three;
+	padding: adapt(35px, 1440px) adapt(20px, 1440px);
+	padding-top: adapt(122px, 1440px);
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+
+	> .settings__button {
+		align-self: end;
+		width: adapt(102px, 1440px);
+		height: adapt(102px, 1440px);
+		background-color: transparent;
+		position: fixed;
+		top: 0;
+		z-index: 5555;
+
+		&:hover {
+			cursor: pointer;
+			background-color: $color_four;
+		}
+
+		> span {
+			width: adapt(102px, 1440px);
+			height: 2px;
+			background-color: $color_two;
+			display: block;
+			transform: rotate(-45deg);
+		}
+
+		&::after {
+			position: absolute;
+			content: '';
+			width: adapt(102px, 1440px);
+			height: 2px;
+			left: 0;
+			bottom: 44.5%;
+			background-color: $color_two;
+			transform: rotate(45deg);
+			z-index: 6000;
+		}
+	}
+}
